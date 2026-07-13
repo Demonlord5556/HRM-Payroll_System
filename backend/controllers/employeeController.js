@@ -7,6 +7,69 @@ const { sendWelcomeEmail } = require('../config/email');
 const SALT_ROUNDS = 12;
 
 /**
+ * Helper to map snake_case DB row to camelCase frontend-friendly object
+ */
+const mapEmployee = (row) => ({
+  id: row.id,
+  employee_id: row.employee_id,
+  user_id: row.user_id,
+  first_name: row.first_name,
+  last_name: row.last_name,
+  name: `${row.first_name || ''} ${row.last_name || ''}`.trim(),
+  email: row.email,
+  phone: row.phone,
+  contactNumber: row.phone,
+  gender: row.gender,
+  date_of_birth: row.date_of_birth,
+  dob: row.date_of_birth,
+  address: row.address,
+  city: row.city,
+  state: row.state,
+  postal_code: row.postal_code,
+  postalCode: row.postal_code,
+  country: row.country,
+  emergency_contact_name: row.emergency_contact_name,
+  emergencyContactName: row.emergency_contact_name,
+  emergency_contact_phone: row.emergency_contact_phone,
+  emergencyContactPhone: row.emergency_contact_phone,
+  emergency_contact_relation: row.emergency_contact_relation,
+  emergencyContactRelation: row.emergency_contact_relation,
+  department_id: row.department_id,
+  departmentId: row.department_id,
+  department_name: row.department_name,
+  designation_id: row.designation_id,
+  designationId: row.designation_id,
+  designation_title: row.designation_title,
+  reporting_manager_id: row.reporting_manager_id,
+  reportingManagerId: row.reporting_manager_id,
+  manager_name: row.manager_name,
+  joining_date: row.joining_date,
+  joiningDate: row.joining_date,
+  employment_type: row.employment_type,
+  employmentType: row.employment_type,
+  work_location: row.work_location,
+  workLocation: row.work_location,
+  basic_salary: row.basic_salary,
+  baseSalaryMonthly: row.basic_salary,
+  profile_picture: row.profile_picture,
+  bank_account_name: row.bank_account_name,
+  bank_account_number: row.bank_account_number,
+  bank_name: row.bank_name,
+  bank_ifsc: row.bank_ifsc,
+  bank_branch: row.bank_branch,
+  pan_number: row.pan_number,
+  panNumber: row.pan_number,
+  aadhar_number: row.aadhar_number,
+  aadharNumber: row.aadhar_number,
+  uan_number: row.uan_number,
+  pf_number: row.pf_number,
+  is_active: row.is_active,
+  created_by: row.created_by,
+  created_at: row.created_at,
+  updated_at: row.updated_at
+});
+
+/**
  * Get employees with pagination and filters
  * GET /api/employees
  */
@@ -55,18 +118,23 @@ const getEmployees = async (req, res) => {
       `SELECT e.*, 
               d.name as department_name, 
               des.title as designation_title,
-              CONCAT(m.first_name, ' ', m.last_name) as manager_name
+              CONCAT(m.first_name, ' ', m.last_name) as manager_name,
+              ss.basic_salary
        FROM employees e
        LEFT JOIN departments d ON e.department_id = d.id
        LEFT JOIN designations des ON e.designation_id = des.id
        LEFT JOIN employees m ON e.reporting_manager_id = m.id
+       LEFT JOIN salary_structures ss ON ss.employee_id = e.id AND ss.is_active = 1
        ${whereClause}
        ORDER BY e.created_at DESC
        LIMIT ? OFFSET ?`,
-      [...params, String(limit), String(offset)]
+      [...params, limit, offset]
     );
 
-    return paginated(res, employees, total, page, limit);
+    // Map to camelCase for frontend
+    const mapped = employees.map(mapEmployee);
+
+    return paginated(res, mapped, total, page, limit);
   } catch (err) {
     console.error('Get employees error:', err);
     return error(res, 'Failed to fetch employees');
@@ -100,7 +168,7 @@ const getEmployeeById = async (req, res) => {
       return notFound(res, 'Employee not found');
     }
 
-    return success(res, employees[0]);
+    return success(res, mapEmployee(employees[0]));
   } catch (err) {
     console.error('Get employee error:', err);
     return error(res, 'Failed to fetch employee');
@@ -314,7 +382,10 @@ const deactivateEmployee = async (req, res) => {
     await pool.query('UPDATE employees SET is_active = 0 WHERE id = ?', [id]);
     
     if (existing[0].user_id) {
-      await pool.query('UPDATE users SET is_active = 0 WHERE id = ?', [existing[0].user_id]);
+      await pool.query(
+        'UPDATE users SET is_active = 0, refresh_token = NULL, refresh_token_expires_at = NULL WHERE id = ?',
+        [existing[0].user_id]
+      );
     }
 
     return success(res, null, 'Employee deactivated successfully');
@@ -349,7 +420,7 @@ const getMyProfile = async (req, res) => {
       return notFound(res, 'Employee profile not found');
     }
 
-    return success(res, employees[0]);
+    return success(res, mapEmployee(employees[0]));
   } catch (err) {
     console.error('Get my profile error:', err);
     return error(res, 'Failed to fetch profile');

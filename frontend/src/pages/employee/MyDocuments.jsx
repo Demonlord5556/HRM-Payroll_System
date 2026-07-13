@@ -59,12 +59,12 @@ export default function MyDocuments() {
         <table>
           <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Uploaded</th><th>Status</th></tr></thead>
           <tbody>
-            {documents.map(d => (
+            {Array.isArray(documents) && documents.length > 0 && documents.map(d => (
               <tr key={d.id}>
                 <td>{d.name}</td>
                 <td><span className="badge badge-info">{d.type}</span></td>
                 <td>{d.file_size ? `${(d.file_size / 1024).toFixed(1)} KB` : '-'}</td>
-                <td>{new Date(d.uploaded_at).toLocaleDateString()}</td>
+                <td>{d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString() : '-'}</td>
                 <td><span className={`badge ${d.is_verified ? 'badge-success' : 'badge-warning'}`}>{d.is_verified ? 'Verified' : 'Pending'}</span></td>
               </tr>
             ))}

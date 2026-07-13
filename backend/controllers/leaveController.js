@@ -193,7 +193,7 @@ const getAllLeaves = async (req, res) => {
        ${whereClause}
        ORDER BY lr.applied_at DESC
        LIMIT ? OFFSET ?`,
-      [...params, String(limit), String(offset)]
+       [...params, limit, offset]
     );
 
     return paginated(res, leaves, total, page, limit);

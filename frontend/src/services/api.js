@@ -28,7 +28,8 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Do NOT attempt token refresh for the login endpoint itself
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/login')) {
       originalRequest._retry = true;
 
       try {
@@ -37,8 +38,11 @@ api.interceptors.response.use(
           refreshToken
         }, { withCredentials: true });
 
-        const { accessToken } = response.data.data;
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
         localStorage.setItem('accessToken', accessToken);
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken);
+        }
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
@@ -128,7 +132,10 @@ export const payrollAPI = {
   getSalaryStructure: () => api.get('/payroll/salary-structure'),
   downloadPayslip: (id) => api.get(`/payroll/${id}/download`, { responseType: 'blob' }),
   getRuns: () => api.get('/payroll/runs'),
-  process: (data) => api.post('/payroll/process', data)
+  getEmployees: () => api.get('/payroll/employees'),
+  updateSalary: (id, data) => api.put(`/payroll/employees/${id}/salary`, data),
+  process: (data) => api.post('/payroll/process', data),
+  generate: (data) => api.post('/payroll/generate', data)
 };
 
 // Holiday APIs
@@ -141,7 +148,8 @@ export const holidayAPI = {
 
 // Document APIs
 export const documentAPI = {
-  getMy: () => api.get('/documents'),
+  getMy: () => api.get('/documents/my'),
+  getAll: () => api.get('/documents/all'),
   upload: (formData) => api.post('/documents/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })

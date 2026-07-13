@@ -234,7 +234,7 @@ const getAttendanceHistory = async (req, res) => {
 
     const [records] = await pool.query(
       `SELECT * FROM attendance ${whereClause} ORDER BY date DESC LIMIT ? OFFSET ?`,
-      [...params, String(limit), String(offset)]
+      [...params, limit, offset]
     );
 
     return paginated(res, records, total, page, limit);
@@ -312,7 +312,7 @@ const getAllAttendance = async (req, res) => {
        ${whereClause}
        ORDER BY a.date DESC, a.check_in_time DESC
        LIMIT ? OFFSET ?`,
-      [...params, String(limit), String(offset)]
+      [...params, limit, offset]
     );
 
     return paginated(res, records, total, page, limit);

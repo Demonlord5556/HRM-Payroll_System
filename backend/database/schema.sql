@@ -332,6 +332,11 @@ CREATE TABLE IF NOT EXISTS documents (
   file_size INT DEFAULT 0,
   mime_type VARCHAR(100),
   is_verified TINYINT(1) NOT NULL DEFAULT 0,
+  -- New workflow status for Admin moderation
+  -- Pending: uploaded but not yet moderated
+  -- Verified: approved/accepted
+  -- Rejected: rejected by admin/HR
+  status ENUM('Pending','Verified','Rejected') NOT NULL DEFAULT 'Pending',
   verified_by VARCHAR(36) NULL,
   verified_at TIMESTAMP NULL,
   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -498,5 +503,5 @@ ON DUPLICATE KEY UPDATE name = VALUES(name);
 -- Create default Super Admin user (password: Admin@123)
 -- Password hash for 'Admin@123' with bcrypt
 INSERT INTO users (id, employee_id, email, password_hash, role_id, is_temp_password, must_change_password, is_active) VALUES
-('user_admin', 'ADMIN001', 'admin@hrpayroll.com', '$2a$10$8KzQMGx5C5Kc5Q5Y5Q5Y5u5Y5Q5Y5Q5Y5Q5Y5Q5Y5Q5Y5Q5Y5Q5Y', 'role_super_admin', 0, 0, 1)
+('user_admin', 'ADMIN001', 'admin@hrpayroll.com', 'Admin@123', 'role_super_admin', 0, 0, 1)
 ON DUPLICATE KEY UPDATE email = VALUES(email);

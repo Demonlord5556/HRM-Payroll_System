@@ -73,8 +73,8 @@ export default function MyLeaves() {
             {leaves.map(l => (
               <tr key={l.id}>
                 <td><span className="badge badge-info">{l.leave_type_name}</span></td>
-                <td>{l.start_date}</td>
-                <td>{l.end_date}</td>
+                <td>{l.startDate}</td>
+                <td>{l.endDate}</td>
                 <td>{l.total_days}</td>
                 <td style={{ maxWidth: 200 }}>{l.reason}</td>
                 <td>{getStatusBadge(l.status)}</td>

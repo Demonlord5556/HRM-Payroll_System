@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function TopBar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = user?.role_name === 'SUPER_ADMIN' || user?.role_name === 'HR_ADMIN';
+  const isAdmin = (user?.role_name || user?.role) === 'SUPER_ADMIN' || (user?.role_name || user?.role) === 'HR_ADMIN';
 
   const handleLogout = async () => {
     await logout();
@@ -36,9 +36,9 @@ export default function TopBar() {
       </div>
       <div className="topbar-right">
         <span style={{ fontSize: '13px', color: '#64748b' }}>
-          {user?.role_name === 'SUPER_ADMIN' ? 'Super Admin' : 
-           user?.role_name === 'HR_ADMIN' ? 'HR Admin' :
-           user?.role_name === 'MANAGER' ? 'Manager' : 'Employee'}
+          {(user?.role_name || user?.role) === 'SUPER_ADMIN' ? 'Super Admin' : 
+           (user?.role_name || user?.role) === 'HR_ADMIN' ? 'HR Admin' :
+           (user?.role_name || user?.role) === 'MANAGER' ? 'Manager' : 'Employee'}
         </span>
         <button className="btn btn-sm" onClick={handleLogout}>
           Logout

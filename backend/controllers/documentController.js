@@ -42,4 +42,21 @@ const uploadDocument = async (req, res) => {
   }
 };
 
-module.exports = { getMyDocuments, uploadDocument };
+const getAllDocuments = async (req, res) => {
+  try {
+    const [documents] = await pool.query(
+      `SELECT d.*, 
+              CONCAT(e.first_name, ' ', e.last_name) as employee_name,
+              e.employee_id
+       FROM documents d
+       LEFT JOIN employees e ON d.employee_id = e.id
+       ORDER BY d.uploaded_at DESC`
+    );
+    return success(res, documents);
+  } catch (err) {
+    console.error('Get all documents error:', err);
+    return error(res, 'Failed to fetch documents');
+  }
+};
+
+module.exports = { getMyDocuments, getAllDocuments, uploadDocument };

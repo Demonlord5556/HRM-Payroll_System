@@ -6,6 +6,8 @@ export default function LeaveManagement() {
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Pending');
+  const [rejectId, setRejectId] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => { loadData(); }, [filter]);
 
@@ -22,10 +24,15 @@ export default function LeaveManagement() {
     catch (err) { toast.error('Failed'); }
   };
 
-  const handleReject = async (id) => {
-    const reason = prompt('Rejection reason:');
-    try { await leaveAPI.reject(id, { rejection_reason: reason }); toast.success('Rejected'); loadData(); }
-    catch (err) { toast.error('Failed'); }
+  const openReject = (id) => { setRejectId(id); setRejectReason(''); };
+
+  const submitReject = async () => {
+    try {
+      await leaveAPI.reject(rejectId, { rejection_reason: rejectReason });
+      toast.success('Rejected');
+      setRejectId(null);
+      loadData();
+    } catch (err) { toast.error('Failed'); }
   };
 
   const getStatusBadge = (status) => {
@@ -52,8 +59,8 @@ export default function LeaveManagement() {
               <tr key={l.id}>
                 <td>{l.employee_name}</td>
                 <td><span className="badge badge-info">{l.leave_type_name}</span></td>
-                <td>{l.start_date}</td>
-                <td>{l.end_date}</td>
+                <td>{l.startDate}</td>
+                <td>{l.endDate}</td>
                 <td>{l.total_days}</td>
                 <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.reason}</td>
                 <td>{getStatusBadge(l.status)}</td>
@@ -61,7 +68,7 @@ export default function LeaveManagement() {
                   {l.status === 'Pending' && (
                     <>
                       <button className="btn btn-sm btn-success" onClick={() => handleApprove(l.id)}>Approve</button>
-                      <button className="btn btn-sm btn-danger" style={{ marginLeft: 8 }} onClick={() => handleReject(l.id)}>Reject</button>
+                      <button className="btn btn-sm btn-danger" style={{ marginLeft: 8 }} onClick={() => openReject(l.id)}>Reject</button>
                     </>
                   )}
                 </td>
@@ -70,6 +77,27 @@ export default function LeaveManagement() {
           </tbody>
         </table>
       </div>
+
+      {rejectId && (
+        <div className="modal-overlay" onClick={() => setRejectId(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">Rejection Reason</div>
+              <button className="btn btn-sm" onClick={() => setRejectId(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Reason for rejection</label>
+                <textarea className="form-textarea" value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Enter rejection reason" />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn" onClick={() => setRejectId(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={submitReject}>Reject</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -14,6 +14,7 @@ const adminLinks = [
     { to: '/admin/leaves', label: 'Leave Management', icon: '📅' },
     { to: '/admin/payroll', label: 'Payroll', icon: '💰' },
     { to: '/admin/holidays', label: 'Holidays', icon: '🎉' },
+    { to: '/admin/documents', label: 'Documents', icon: '📄' },
   ]},
   { section: 'System', items: [
     { to: '/admin/settings', label: 'Settings', icon: '⚙️' },
@@ -36,7 +37,8 @@ export default function Sidebar() {
   const { user } = useAuth();
   const location = useLocation();
   
-  const isAdmin = user?.role_name === 'SUPER_ADMIN' || user?.role_name === 'HR_ADMIN';
+  const roleName = user?.role || user?.role_name;
+  const isAdmin = roleName === 'SUPER_ADMIN' || roleName === 'HR_ADMIN';
   const links = isAdmin ? adminLinks : employeeLinks;
 
   return (
@@ -58,7 +60,15 @@ export default function Sidebar() {
                 }
               >
                 <span>{link.icon}</span>
-                <span>{link.label}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  {link.label}
+                  {link.to === '/employee/leaves' && (user?.unreadLeavesCount ?? 0) > 0 ? (
+                    <span className="nav-badge">{user.unreadLeavesCount}</span>
+                  ) : null}
+                  {link.to === '/employee/documents' && user?.unreadDocumentsCount ? (
+                    <span className="nav-badge">{user.unreadDocumentsCount}</span>
+                  ) : null}
+                </span>
               </NavLink>
             ))}
           </div>

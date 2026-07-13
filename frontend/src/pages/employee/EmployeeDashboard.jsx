@@ -202,7 +202,7 @@ export default function EmployeeDashboard() {
             <div className="stat-icon blue">📊</div>
             <div className="stat-content">
               <div className="stat-label">Total Hours</div>
-              <div className="stat-value">{summary.total_working_hours?.toFixed(1) || 0}h</div>
+              <div className="stat-value">{parseFloat(summary.total_working_hours || 0).toFixed(1) || 0}h</div>
             </div>
           </div>
         </div>

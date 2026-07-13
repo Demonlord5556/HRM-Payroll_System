@@ -14,6 +14,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import EmployeeManagement from './pages/admin/EmployeeManagement';
+import AdminDocuments from './pages/admin/AdminDocuments';
 import DepartmentManagement from './pages/admin/DepartmentManagement';
 import DesignationManagement from './pages/admin/DesignationManagement';
 import AttendanceManagement from './pages/admin/AttendanceManagement';
@@ -48,11 +49,11 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
 
-          {/* Protected Routes with Layout */}
-          <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-            {/* Admin Routes */}
+          {/* Admin Routes */}
+          <Route element={<ProtectedRoute requiredRole="SUPER_ADMIN"><DashboardLayout /></ProtectedRoute>}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/employees" element={<EmployeeManagement />} />
+            <Route path="/admin/documents" element={<AdminDocuments />} />
             <Route path="/admin/departments" element={<DepartmentManagement />} />
             <Route path="/admin/designations" element={<DesignationManagement />} />
             <Route path="/admin/attendance" element={<AttendanceManagement />} />
@@ -60,8 +61,10 @@ export default function App() {
             <Route path="/admin/payroll" element={<PayrollManagement />} />
             <Route path="/admin/holidays" element={<HolidayManagement />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
+          </Route>
 
-            {/* Employee Routes */}
+          {/* Employee Routes */}
+          <Route element={<ProtectedRoute requiredRole="EMPLOYEE"><DashboardLayout /></ProtectedRoute>}>
             <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
             <Route path="/employee/profile" element={<MyProfile />} />
             <Route path="/employee/attendance" element={<MyAttendance />} />
